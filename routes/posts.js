@@ -102,7 +102,7 @@ router.post('/postLikes', async (req, res) => {
 });
 
 // 查詢
-router.post('/likes', async (req, res) => {
+router.get('/likes', async (req, res) => {
   try{
     const data = req.body
     if(!data.userInfo ){

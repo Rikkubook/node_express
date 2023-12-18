@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const likesSchema = new mongoose.Schema({
   userInfo: {
     type: mongoose.Schema.ObjectId,
-    ref: 'user',
+    ref: 'User',
     required: [true, '請輸入您的userId']
   },
   posts: [{
     type: mongoose.Schema.ObjectId,
-    ref: 'post',
+    ref: 'Post',
   }],
   createAt: {
     type: Date,
@@ -20,6 +20,6 @@ const likesSchema = new mongoose.Schema({
   versionKey: false, // __v: 引藏
 });
 
-const Like = mongoose.model('like', likesSchema);
+const Like = mongoose.model('Like', likesSchema);
 
 module.exports = Like;

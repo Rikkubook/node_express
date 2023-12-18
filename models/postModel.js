@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const postsSchema = new mongoose.Schema({
   userInfo: {
     type: mongoose.Schema.ObjectId,
-    ref: 'user',
+    ref: 'User',
     required: [true, '請輸入您的userId']
   },
   content: {
@@ -13,7 +13,7 @@ const postsSchema = new mongoose.Schema({
   image: String,
   likes: [{
     type: mongoose.Schema.ObjectId,
-    ref: 'user',
+    ref: 'User',
   }],
   createAt: {
     type: Date,
@@ -22,9 +22,9 @@ const postsSchema = new mongoose.Schema({
   },
 },
 {
-  versionKey: false, // __v: 引藏
+  versionKey: false, // __v: 隱藏 // --V:0
 });
 
-const Post = mongoose.model('post', postsSchema);
+const Post = mongoose.model('Post', postsSchema);
 
 module.exports = Post;
