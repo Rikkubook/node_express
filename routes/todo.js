@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Todo = require('../models/todoModel')
+const User = require('../models/userModel')
 const { successHandler, errorHandler } = require('../handler');
 
 /* GET users listing. */
@@ -22,6 +23,14 @@ router.post('/', async (req, res) => {
     }else if(!data.title){
       throw '內文不為空'
     }
+
+    if(data.userID){ // 防止沒有使用者依然可以輸入
+      const user =await User.findById(data.userID);
+      if(!user){
+        throw '沒有這位使用者'
+      }
+    }
+  
     const TodoItem = await Todo.create({
       userInfo: data.userID,
       title: data.title,
@@ -37,9 +46,7 @@ router.patch('/:id', async (req, res) => {
     const id = req.params.id;
     const data = req.body
 
-    if(!data.userID){
-      throw '使用者ID不為空'
-    }else if(!data.title){
+    if(!data.title){
       throw '內文不為空'
     }
     if(data.completed){
@@ -50,9 +57,10 @@ router.patch('/:id', async (req, res) => {
     console.log(resultUser)
     if(resultUser == null){
       throw '查無此id'
-    }
-  
-    successHandler(res, resultUser)
+    } // 會是找到那筆，但未修改
+
+    const newData =await Todo.findById(id);
+    successHandler(res, newData)
   }catch(error){
     errorHandler(res,error,400)
   }
