@@ -3,13 +3,17 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, '請輸入您的名字']
+    required: [true, '請輸入您的 姓名'],
   },
   email: {
     type: String,
     required: [true, '請輸入您的 Email'],
     unique: true,
     lowercase: false,
+  },
+  password: {
+    type: String,
+    required: true,
     select: false // 不顯示
   },
   photo: String,

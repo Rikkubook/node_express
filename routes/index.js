@@ -19,4 +19,9 @@ router.get('/', async (req, res) =>{
   console.log('index')
 });
 
+router.get('/success', async (req, res) =>{
+  const message = req.query.message || '';
+  res.render('success', {message})
+});
+
 module.exports = router;

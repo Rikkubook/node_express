@@ -16,16 +16,22 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try{
     const data =req.body
-    console.log(data)
-    if(!data.name || !data.email){
-      throw '名字/Email為必填'
+
+    if(!data.name){
+      throw '使用者名稱不為空'
+    }else if(!data.email){
+      throw 'Email不為空'
+    }else if(!data.password){
+      throw '密碼不為空'
     }
-    const newPost =await User.create({
+
+    const newUser =await User.create({
       name: data.name,
       email: data.email,
-      photo: data.photo
+      photo: data.photo,
+      password: data.password
     });
-    successHandler(res, newPost)
+    successHandler(res, newUser)
   }catch(error){
     errorHandler(res,error,400)
   }
