@@ -15,9 +15,11 @@ mongoose.connect(DB).then(()=>{
   console.log(error)
 })
 
+//管理Router
 var indexRouter = require('./routes/index')
-var postsRouter = require('./routes/posts'); //管理Router
-var usersRouter = require('./routes/users'); //管理Router
+var postsRouter = require('./routes/posts'); 
+var usersRouter = require('./routes/users');
+var todoRouter = require('./routes/todo');
 
 var app = express();
 
@@ -32,9 +34,11 @@ app.use(express.urlencoded({ extended: false })); //app.use(bodyParser.urlencode
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'))); // 預定靜態路由 使ejs 可以使用圖片等
 
-app.use('/', indexRouter);
+
 app.use('/posts', postsRouter);
 app.use('/users', usersRouter);
+app.use('/todo', todoRouter);
+app.use('/', indexRouter); // 要放在最後
 
 
 // catch 404 and forward to error handler
