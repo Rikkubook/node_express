@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/postModel')
 const Like = require('../models/likesModel')
+const User = require('../models/userModel')
 const { successHandler, errorHandler } = require('../handler');
 
 
@@ -23,11 +24,21 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try{
     const data = req.body
-    if(!data.userInfo || !data.content ){
-      throw '名稱、內文、缺一不可'
+    if(!data.userID){
+      throw '使用者ID不為空'
+    }else if(!data.content){
+      throw '內文不為空'
     }
+
+    if(data.userID){ // 防止沒有使用者依然可以輸入
+      const user =await User.findById(data.userID);
+      if(!user){
+        throw '沒有這位使用者'
+      }
+    }
+
     const newPost = await Post.create({
-        userInfo: data.userInfo,
+        userInfo: data.userID,
         image: data.image,
         content: data.content,
         likes: data.likes,
@@ -35,6 +46,27 @@ router.post('/', async (req, res) => {
         createdAt: data.createdAt,
       })
     successHandler(res, newPost)
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
+router.patch('/:id', async (req, res) => {
+  try{
+    const id = req.params.id;
+    const data = req.body
+
+    if(!data.content){
+      throw '內文不為空'
+    }
+
+    const resultPost = await Post.findByIdAndUpdate(id,data);
+    if(resultPost == null){
+      throw '查無此id'
+    } // 會是找到那筆，但未修改
+
+    const newData =await Post.findById(id);
+    successHandler(res, newData)
   }catch(error){
     errorHandler(res,error,400)
   }
@@ -49,20 +81,32 @@ router.delete('/', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  try{
+    const id = req.params.id;
+    const resultUser = await Post.findByIdAndDelete(id);
+    if(resultUser == null){
+      throw '查無此id'
+    }
+    const posts =await Post.find({});
+    successHandler(res, posts)
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
 
 //----------------------------------------------------------------
 
-///???? 如果刪除文章時 收藏這邊要刪嗎?? 還是回傳此文章已刪就好
 
 //新增-移除
 router.post('/postLikes', async (req, res) => {
   try{
     const data = req.body
-    if(!data.userInfo || !data.posts ){
+    if(!data.userID || !data.posts ){
       throw '使用者Id、喜歡文章Id、缺一不可'
     }
 
-    const user = await Like.findOne({"userInfo": data.userInfo})
+    const user = await Like.findOne({"userInfo": data.userID})
     const post = await Post.findOne({"_id": data.posts})
 
     if(user){
@@ -72,7 +116,7 @@ router.post('/postLikes', async (req, res) => {
         user.save()
 
         // 移除時文章連動
-        const likesIndex = post.likes.indexOf(data.userInfo)
+        const likesIndex = post.likes.indexOf(data.userID)
         post.likes.splice(likesIndex, 1) 
         post.save()
 
@@ -82,17 +126,17 @@ router.post('/postLikes', async (req, res) => {
         user.save()
 
         // 收藏時文章連動
-        post.likes.unshift(data.userInfo) 
+        post.likes.unshift(data.userID) 
         post.save()
         successHandler(res, user)
       }
     }else{
       const newLike = await Like.create({
-        userInfo: data.userInfo,
+        userInfo: data.userID,
         posts: [data.posts],
       })
        // 收藏時文章連動
-      post.likes.unshift(data.userInfo) 
+      post.likes.unshift(data.userID) 
       post.save()
       successHandler(res, newLike)
     }
@@ -105,11 +149,11 @@ router.post('/postLikes', async (req, res) => {
 router.get('/likes', async (req, res) => {
   try{
     const data = req.body
-    if(!data.userInfo ){
+    if(!data.userID ){
       throw '使用者Id缺一不可'
     }
 
-    const likes = await Like.findOne({"userInfo": data.userInfo})
+    const likes = await Like.findOne({"userInfo": data.userID})
     .populate({ //此是先將userInfo 編譯
       path: 'userInfo',
       select: 'name photo'
