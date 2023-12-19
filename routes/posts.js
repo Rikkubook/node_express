@@ -81,20 +81,6 @@ router.delete('/', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
-  try{
-    const id = req.params.id;
-    const resultUser = await Post.findByIdAndDelete(id);
-    if(resultUser == null){
-      throw '查無此id'
-    }
-    const posts =await Post.find({});
-    successHandler(res, posts)
-  }catch(error){
-    errorHandler(res,error,400)
-  }
-});
-
 //----------------------------------------------------------------
 
 
@@ -172,6 +158,20 @@ router.delete('/likes', async (req, res) => {
   try{
     await Like.deleteMany({});
     successHandler(res, [])
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try{
+    const id = req.params.id;
+    const resultUser = await Post.findByIdAndDelete(id);
+    if(resultUser == null){
+      throw '查無此id'
+    }
+    const posts =await Post.find({});
+    successHandler(res, posts)
   }catch(error){
     errorHandler(res,error,400)
   }
