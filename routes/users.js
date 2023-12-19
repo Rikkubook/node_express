@@ -31,29 +31,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/', async (req, res) => {
-  try{
-    await User.deleteMany({});
-    successHandler(res, [])
-  }catch(error){
-    errorHandler(res,error,400)
-  }
-});
-
-router.delete('/:id', async (req, res) => {
-  try{
-    const id = req.params.id;
-    const resultUser = await User.findByIdAndDelete(id);
-    if(resultUser == null){
-      throw '查無此id'
-    }
-    const users =await User.find({});
-    successHandler(res, users)
-  }catch(error){
-    errorHandler(res,error,400)
-  }
-});
-
 router.patch('/:id', async (req, res) => {
   try{
     const id = req.params.id;
@@ -77,4 +54,28 @@ router.patch('/:id', async (req, res) => {
     errorHandler(res,error,400)
   }
 });
+
+router.delete('/', async (req, res) => {
+  try{
+    await User.deleteMany({});
+    successHandler(res, [])
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try{
+    const id = req.params.id;
+    const resultUser = await User.findByIdAndDelete(id);
+    if(resultUser == null){
+      throw '查無此id'
+    }
+    const users =await User.find({});
+    successHandler(res, users)
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
 module.exports = router;
