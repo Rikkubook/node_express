@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const studentSchema = new mongoose.Schema({
   name: {
-    type: String,
-    required: true
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
   },
   age: {
     type: String,
@@ -26,6 +26,6 @@ const studentSchema = new mongoose.Schema({
 
 // // create a modal for students 會自動轉為 students
 // // model 內第一個字大寫且單數
-const StudentModal = mongoose.model("Student", studentSchema)
+const Student = mongoose.model("Student", studentSchema)
 
-export default StudentModal;
+module.exports = Student;

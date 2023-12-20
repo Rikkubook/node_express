@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <form action="/students/edit/<% data.id %>" method="POST">
+    <label for="id">ID:</label>
+    <input type="number" id="id" name="id" value="<%= data.id %>">
+    <label for="fullname">Name:</label>
+    <input type="text" id="fullname" name="name" value="<%= data.name %>">
+    <label for="age">Age:</label>
+    <input type="number" id="age" name="age" value="<%= data.age %>">
+    <label for="merit">Merit:</label>
+    <input type="number" id="merit" name="merit" value="<%= data.merit %>">
+    <label for="other">Other:</label>
+    <input type="number" id="other" name="other " value="<%= data.other %>">
+    <button type="submit"> 送出</button>
+  </form>
+</body>
+</html>

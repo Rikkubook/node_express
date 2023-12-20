@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/userModel')
+const User = require('../models/userModel');
+const Student = require('../models/studentModel');
 const { successHandler, errorHandler } = require('../handler');
 
 // 註冊畫面
@@ -98,9 +99,128 @@ router.post("/login", async(req, res, next)=>{
     }
 
   } catch (err){
-    res.render('signup');
+    res.render('signup', { message: error });
   }
 })
 
+// 學生列表畫面
+router.get("/studentsList", async(req, res, next)=>{
+  try{
+    let data = await User.find()
+    // res.send(data)　// 打到POSTMAN 確認資料
+    res.render('students/studentsList', { data });
+  }catch{
+    res.send({message:"Error with finding data"})
+  }
+})
+
+// 個人資料畫面
+router.get("students/studentsList/:id", async(req, res, next)=>{
+  try{
+    let {id} =req.params
+    let data = await Student.findOne({id})
+		if(data !== null){ // 前端頁面會沒有data.name
+      res.send(data)
+    }else{
+      res.status(404)
+      res.send({message: "Cannot find this student"})
+    }
+    res.send(data)　// 打到POSTMAN 確認資料
+  }catch(e){
+    res.status(404)
+    res.send({message:"Error with finding data"})
+    console.log(e)
+  }
+})
+
+// 個人資料API CRUD
+router.get('/', async (req, res) => {
+  console.log('stud')
+  try{
+    const studentPage = await Student.find({})
+    successHandler(res, studentPage)
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
+router.post('/:id', async (req, res) => {
+  console.log('stud')
+  try{
+    const id = req.params.id
+    const data = req.body
+
+    const user =await User.findById(id);
+    if(!user){
+      throw '沒有這位使用者'
+    }
+
+    const userInfo =await Student.findOne({"name": id});
+
+    // 沒有才新增
+    if(!userInfo){
+      const newStudentPage = await Student.create({
+        name: id,
+        age: data.age,
+        major: data.major,
+        scholarship: data.scholarship,
+      })
+      successHandler(res, newStudentPage)
+    }else{
+      throw '已有此位使用者'
+    }
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
+router.patch('/:id', async (req, res) => {
+  try{
+    const id = req.params.id
+    const data = req.body
+
+    const user =await User.findById(id);
+    if(!user){
+      throw '沒有這位使用者'
+    }
+
+    const resultPage = await Student.findOneAndUpdate({"name": id}, data)
+    if(resultPage == null){
+      throw '查無此id'
+    }
+    const newData =await Student.findOne({"name": id});
+    successHandler(res, newData)
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
+router.delete('/', async (req, res) => {
+  try{
+    await Student.deleteMany({});
+    successHandler(res, [])
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try{
+    const id = req.params.id
+    const user =await User.findById(id);
+    if(!user){
+      throw '沒有這位使用者'
+    }
+
+    const resultPage = await Student.findOneAndDelete({"name": id})
+    if(resultPage == null){
+      throw '查無此id'
+    }
+    const studentPages =await Student.find({});
+    successHandler(res, studentPages)
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
 
 module.exports = router;
