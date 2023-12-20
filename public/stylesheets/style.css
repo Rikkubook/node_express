@@ -112,6 +112,11 @@ input{
     outline: none;
   }
 }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
 .studentsListTable td, .studentsListTable th{
   width:50vw
@@ -131,6 +136,8 @@ input{
   text-align: right;
 }
 .btn{
+  display: inline-block;
+  text-align: center;
   min-width: 100px;
   padding: 2px 5px;
   border-radius: 2px;

@@ -107,25 +107,136 @@ router.post("/login", async(req, res, next)=>{
 router.get("/studentsList", async(req, res, next)=>{
   try{
     let data = await User.find()
-    // res.send(data)　// 打到POSTMAN 確認資料
     res.render('students/studentsList', { data });
   }catch{
     res.send({message:"Error with finding data"})
   }
 })
-
 // 個人資料畫面
-router.get("students/studentsList/:id", async(req, res, next)=>{
+router.get("/studentsList/:id", async(req, res, next)=>{
   try{
     let {id} =req.params
-    let data = await Student.findOne({id})
-		if(data !== null){ // 前端頁面會沒有data.name
-      res.send(data)
-    }else{
-      res.status(404)
-      res.send({message: "Cannot find this student"})
+    let userData = await User.findById(id);
+    let userInfo = await Student.findOne({"name": id});
+
+    if(!userData){
+      res.send({message:"無此使用者"})
     }
-    res.send(data)　// 打到POSTMAN 確認資料
+    if(!userInfo){
+      res.redirect(`/students/studentInsert/${id}`)
+    }else{
+      res.redirect(`/students/studentPage/${id}`)
+    }
+
+  }catch(e){
+    res.status(404)
+    res.send({message:"Error with finding data"})
+    console.log(e)
+  }
+})
+// 個人新增畫面
+router.get("/studentInsert/:id", async(req, res, next)=>{
+  try{
+    let {id} =req.params
+    let userData = await User.findById(id);
+    let data = {
+      id: id,
+      name: userData.name,
+      email: userData.email,
+    };
+    res.render('students/studentInsert',{student: data})
+    }catch(e){
+      res.status(404)
+      res.send({message:"Error with finding data"})
+      console.log(e)
+    }
+})
+// 個人編輯畫面
+router.get("/studentEdit/:id", async(req, res, next)=>{
+  try{
+    let {id} =req.params
+    let userData = await User.findById(id);
+    let userInfo = await Student.findOne({"name": id});
+    let data = {
+      name: userData.name,
+      email: userData.email,
+      age: userInfo.age,
+      major: userInfo.major,
+      scholarship:　userInfo.scholarship,
+    };
+    res.render('students/studentEdit',{student: data})
+  }catch(e){
+    res.status(404)
+    res.send({message:"Error with finding data"})
+    console.log(e)
+  }
+})
+// 個人呈現畫面
+router.get("/studentPage/:id", async(req, res, next)=>{
+  try{
+    let {id} =req.params
+    console.log(id)
+    let userData = await User.findById(id);
+    let userInfo = await Student.findOne({"name": id});
+    let data = {
+      id: id,
+      name: userData.name,
+      email: userData.email,
+      age: userInfo.age,
+      major: userInfo.major,
+      scholarship:　userInfo.scholarship,
+    };
+    res.render('students/studentPage',{student: data})
+  }catch(e){
+    res.status(404)
+    res.send({message:"Error with finding data"})
+    console.log(e)
+  }
+  res.render('students/studentPage',{})
+})
+
+
+// 個人新增API
+router.post("/studentInsert/:id", async(req, res, next)=>{
+  try{
+    let {id} =req.params;
+    let data = req.body;
+    let userData = await User.findById(id);
+    let newData = {
+      name: userData.name,
+      email: userData.email,
+      age: data.age,
+      major: data.major,
+      scholarship: {
+        merit: data.merit,
+        other: data.other,
+      }
+    };
+    const userInfo =await Student.findOne({"name": id});
+
+    // 沒有才新增
+    if(!userInfo){
+        await Student.create({
+        name: id,
+        age: data.age,
+        major: data.major,
+        scholarship: {
+          merit: data.merit,
+          other: data.other,
+        },
+      })
+      res.render('students/studentPage',{student: newData})
+    }else{
+      throw '已有此位使用者資料'
+    }
+
+    console.log(newData)
+    // if(!userInfo){
+    //   res.redirect(`/students/studentInsert/${id}`)
+    // }else{
+    //   res.redirect(`/students/studentPage/${id}`)
+    // }
+
   }catch(e){
     res.status(404)
     res.send({message:"Error with finding data"})
@@ -133,9 +244,10 @@ router.get("students/studentsList/:id", async(req, res, next)=>{
   }
 })
 
+//------------------------------------
+
 // 個人資料API CRUD
 router.get('/', async (req, res) => {
-  console.log('stud')
   try{
     const studentPage = await Student.find({})
     successHandler(res, studentPage)
@@ -144,8 +256,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try{
+    const id = req.params.id
+    const studentPage = await Student.findOne({"name": id});
+    successHandler(res, studentPage)
+  }catch(error){
+    errorHandler(res,error,400)
+  }
+});
 router.post('/:id', async (req, res) => {
-  console.log('stud')
   try{
     const id = req.params.id
     const data = req.body
