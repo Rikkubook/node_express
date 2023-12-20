@@ -4,13 +4,26 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Students Page</title>
+  <title>學生列表</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
 <body>
-    <ul>
+  <h1>學生列表</h1>
+  <table class="studentsListTable">
+    <thead>
+      <tr>
+        <th>名稱</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
       <% data.forEach(student => { %>
-        <li><a href="/students/<%= student.id %>"><%= student.name %></a></li>
+      <tr>
+        <td><%= student.name %></td>
+        <td><a class="link" href="/students/studentsList/<%= student.id %>">查看資料</a></td>
+      </tr>
       <% }) %>
-    </ul>
+    </tbody>
+  </table>
 </body>
 </html>
