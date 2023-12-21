@@ -3,6 +3,9 @@ const router = express.Router();
 const User = require('../models/userModel');
 const Student = require('../models/studentModel');
 const { successHandler, errorHandler } = require('../handler');
+var bcrypt = require('bcryptjs');
+var validator = require('validator');
+
 
 // 註冊畫面
 router.get("/signUp", async(req, res, next)=>{
@@ -21,10 +24,20 @@ router.post("/signUp", async (req, res, next)=>{
       throw '密碼不為空'
     }
 
+
+    if(!validator.isLength(data.name,{min:2})){
+      throw "暱稱兩字以上"
+    }
+    if(!validator.isLength(data.password,{min:8})){
+      throw "密碼不可小於 8 碼"
+    }
+
     let findUser = await User.findOne({email})
     if(findUser){
       throw '已有使用者'
     }
+
+    data.password = await bcrypt.hash(data.password,3)
 
     await User.create({
       name: data.name,
@@ -54,28 +67,29 @@ router.post("/login", async(req, res, next)=>{
       throw '密碼不為空'
     }
 
-    let findUser = await User.findOne({email})
-    if(findUser){
+    const user = await User.findOne({ email: data.email }).select('+password')  // 為了要把預設不顯示的取出，添加+
+    console.log(user)
+    if(user){
       // 密碼驗證
-      // bcrypt.compareSync(password, foundUser.password, (err, result)=>{
-      //   if(err){
-      //     next(err)
-      //   }
-  
-      //   if(result === true){
-      //     req.session.isVerified = true;
-      //     res.render("secret")
-      //   }else{
-      //     res.send("not correct")
-      //   }
-      // })
-      res.redirect('/success?message=登入');
+      await bcrypt.compare(data.password, user.password, (err, result) => {
+        if(err){
+          console.log(err)
+          next(err)
+        }
+        if(result === true){
+          res.redirect('/success?message=登入');
+        }else{
+          next(err)
+        }
+      })
+      
     } else{
       throw '尚未註冊'
     }
 
   } catch (err){
-    res.render('signUp', { message: error });
+    console.log('err')
+    res.render('signUp', { message: err });
   }
 })
 
