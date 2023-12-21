@@ -48,7 +48,11 @@
   * DELETE: {{url}}/students/{{id}} 刪除學生單筆資訊
 
 # 搭配EJS 使用
-## 登入、註冊
+* 已搭配bcryptjs、validator、JWT
+* 所有內容皆須登入或註冊才可以看
+* 權限為7天
+
+## 學生頁面
 * 畫面
   * GET: {{url}}/students/signUp 註冊畫面
   * GET: {{url}}/students/login 登入畫面
