@@ -3,9 +3,10 @@ const router = express.Router();
 const User = require('../models/userModel');
 const Student = require('../models/studentModel');
 const { successHandler, errorHandler } = require('../handler');
-var bcrypt = require('bcryptjs');
-var validator = require('validator');
-
+const bcrypt = require('bcryptjs');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const { generateToken, isAuth } = require('../service/auth')
 
 // 註冊畫面
 router.get("/signUp", async(req, res, next)=>{
@@ -39,12 +40,15 @@ router.post("/signUp", async (req, res, next)=>{
 
     data.password = await bcrypt.hash(data.password,3)
 
-    await User.create({
+    const newUser =await User.create({
       name: data.name,
       email: data.email,
       password: data.password
     });
-    res.redirect('/success?message=註冊');
+
+    const token = generateToken(newUser);
+    res.cookie("user_session",token, { httpOnly: true }); //寫入給前端 cookie
+    res.redirect(`/students/studentsList`);
   }catch(error){
     // errorHandler(res,error,400)
     res.render('signUp', { message: error });
@@ -60,7 +64,6 @@ router.post("/login", async(req, res, next)=>{
 
   try{
     const data = req.body
-    const {email} = data
     if(!data.email){
       throw 'Email不為空'
     }else if(!data.password){
@@ -68,16 +71,16 @@ router.post("/login", async(req, res, next)=>{
     }
 
     const user = await User.findOne({ email: data.email }).select('+password')  // 為了要把預設不顯示的取出，添加+
-    console.log(user)
     if(user){
       // 密碼驗證
       await bcrypt.compare(data.password, user.password, (err, result) => {
         if(err){
-          console.log(err)
           next(err)
         }
         if(result === true){
-          res.redirect('/success?message=登入');
+          const token = generateToken(user);
+          res.cookie("user_session",token, { httpOnly: true });
+          res.redirect(`/students/studentsList`);
         }else{
           next(err)
         }
@@ -94,7 +97,7 @@ router.post("/login", async(req, res, next)=>{
 })
 
 // 學生列表畫面
-router.get("/studentsList", async(req, res, next)=>{
+router.get("/studentsList", isAuth, async(req, res, next)=>{
   try{
     let data = await User.find()
     res.render('students/studentsList', { data });
@@ -103,7 +106,7 @@ router.get("/studentsList", async(req, res, next)=>{
   }
 })
 // 個人資料畫面
-router.get("/studentsList/:id", async(req, res, next)=>{
+router.get("/studentsList/:id", isAuth, async(req, res, next)=>{
   try{
     let {id} =req.params
     let userData = await User.findById(id);
@@ -125,7 +128,7 @@ router.get("/studentsList/:id", async(req, res, next)=>{
   }
 })
 // 個人新增畫面
-router.get("/studentInsert/:id", async(req, res, next)=>{
+router.get("/studentInsert/:id", isAuth, async(req, res, next)=>{
   try{
     let {id} =req.params
     let userData = await User.findById(id);
@@ -142,7 +145,7 @@ router.get("/studentInsert/:id", async(req, res, next)=>{
     }
 })
 // 個人編輯畫面
-router.get("/studentEdit/:id", async(req, res, next)=>{
+router.get("/studentEdit/:id", isAuth, async(req, res, next)=>{
   try{
     let {id} =req.params
     let userData = await User.findById(id);
@@ -163,7 +166,7 @@ router.get("/studentEdit/:id", async(req, res, next)=>{
   }
 })
 // 個人呈現畫面
-router.get("/studentPage/:id", async(req, res, next)=>{
+router.get("/studentPage/:id", isAuth, async(req, res, next)=>{
   try{
     let {id} =req.params
     let userData = await User.findById(id);

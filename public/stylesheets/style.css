@@ -61,9 +61,6 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-.link {
-  color: #96785F;
-}
 
 h1{
   font-size: 20px;
@@ -75,7 +72,6 @@ table{
   border-collapse:collapse;
 
 }
-
 th{
   padding: 5px;
   background-color:#009879;
@@ -83,24 +79,21 @@ th{
   font-weight: 600;
 
 }
-
 td{
   padding: 5px;
   background-color:#ffffff;
   text-align:center;
 }
-
 tr{
   border-bottom: 1px solid #dddddd;
 }
-
 tr:last-of-type{
   border-bottom: 2px solid #009879;
 }
-
 tr:nth-of-type(even) td{
   background-color:#f3f3f3;
 }
+
 
 input{
   width: 100%;
@@ -135,6 +128,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .studentsPageTable tfoot td{
   text-align: right;
 }
+
 .btn{
   display: inline-block;
   text-align: center;
@@ -150,4 +144,10 @@ input[type="number"]::-webkit-outer-spin-button {
     cursor: pointer;
     background-color: #96785F;
   }
+}
+.link {
+  color: #96785F;
+}
+.red {
+  color: #b12f2f;
 }
