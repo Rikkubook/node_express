@@ -9,11 +9,11 @@ const jwt = require('jsonwebtoken');
 const { generateToken, isAuth } = require('../service/auth')
 
 // 註冊畫面
-router.get("/signUp", async(req, res, next)=>{
-  res.render('signUp', { message: "" })
+router.get("/signup", async(req, res, next)=>{
+  res.render('signup', { message: "" })
 })
 // 註冊API
-router.post("/signUp", async (req, res, next)=>{
+router.post("/signup", async (req, res, next)=>{
   try{
     const data = req.body
     const {email} = data
@@ -51,7 +51,7 @@ router.post("/signUp", async (req, res, next)=>{
     res.redirect(`/students/studentsList`);
   }catch(error){
     // errorHandler(res,error,400)
-    res.render('signUp', { message: error });
+    res.render('signup', { message: error });
   }
 })
 
@@ -92,7 +92,7 @@ router.post("/login", async(req, res, next)=>{
 
   } catch (err){
     console.log('err')
-    res.render('signUp', { message: err });
+    res.render('signup', { message: err });
   }
 })
 
