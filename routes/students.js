@@ -5,11 +5,11 @@ const Student = require('../models/studentModel');
 const { successHandler, errorHandler } = require('../handler');
 
 // 註冊畫面
-router.get("/signup", async(req, res, next)=>{
-  res.render('signup', { message: "" })
+router.get("/signUp", async(req, res, next)=>{
+  res.render('signUp', { message: "" })
 })
 // 註冊API
-router.post("/signup", async (req, res, next)=>{
+router.post("/signUp", async (req, res, next)=>{
   try{
     const data = req.body
     const {email} = data
@@ -31,34 +31,10 @@ router.post("/signup", async (req, res, next)=>{
       email: data.email,
       password: data.password
     });
-
-    // 密碼驗證
-    // bcrypt.genSalt(saltRounds,(err, salt) => {
-    //   if(err){
-    //     next(err)
-    //   }
-    //   console.log(salt)
-    //   bcrypt.hash(password, salt, (err, hash) => {
-    //     if(err){
-    //       next(err)
-    //     }
-    //     console.log(hash)
-    //     let newUser = new UserModal({username, hash})
-    //     try{
-    //       newUser.save().then(()=>{
-    //         res.send({message: "newUser save into DB"})
-    //       }).catch((e)=>{
-    //         res.send(e)
-    //       })
-    //     }catch (err){
-    //       next(err)
-    //     }
-    //   });
-    // });
     res.redirect('/success?message=註冊');
   }catch(error){
     // errorHandler(res,error,400)
-    res.render('signup', { message: error });
+    res.render('signUp', { message: error });
   }
 })
 
@@ -99,7 +75,7 @@ router.post("/login", async(req, res, next)=>{
     }
 
   } catch (err){
-    res.render('signup', { message: error });
+    res.render('signUp', { message: error });
   }
 })
 
@@ -158,6 +134,7 @@ router.get("/studentEdit/:id", async(req, res, next)=>{
     let userData = await User.findById(id);
     let userInfo = await Student.findOne({"name": id});
     let data = {
+      id: id,
       name: userData.name,
       email: userData.email,
       age: userInfo.age,
@@ -175,7 +152,6 @@ router.get("/studentEdit/:id", async(req, res, next)=>{
 router.get("/studentPage/:id", async(req, res, next)=>{
   try{
     let {id} =req.params
-    console.log(id)
     let userData = await User.findById(id);
     let userInfo = await Student.findOne({"name": id});
     let data = {
@@ -188,11 +164,8 @@ router.get("/studentPage/:id", async(req, res, next)=>{
     };
     res.render('students/studentPage',{student: data})
   }catch(e){
-    res.status(404)
     res.send({message:"Error with finding data"})
-    console.log(e)
   }
-  res.render('students/studentPage',{})
 })
 
 
@@ -201,17 +174,7 @@ router.post("/studentInsert/:id", async(req, res, next)=>{
   try{
     let {id} =req.params;
     let data = req.body;
-    let userData = await User.findById(id);
-    let newData = {
-      name: userData.name,
-      email: userData.email,
-      age: data.age,
-      major: data.major,
-      scholarship: {
-        merit: data.merit,
-        other: data.other,
-      }
-    };
+
     const userInfo =await Student.findOne({"name": id});
 
     // 沒有才新增
@@ -225,20 +188,55 @@ router.post("/studentInsert/:id", async(req, res, next)=>{
           other: data.other,
         },
       })
-      res.render('students/studentPage',{student: newData})
+      res.redirect(`/students/studentPage/${id}`)
     }else{
       throw '已有此位使用者資料'
     }
-
-    console.log(newData)
-    // if(!userInfo){
-    //   res.redirect(`/students/studentInsert/${id}`)
-    // }else{
-    //   res.redirect(`/students/studentPage/${id}`)
-    // }
-
   }catch(e){
     res.status(404)
+    res.send({message:"Error with finding data"})
+    console.log(e)
+  }
+})
+// 個人修改API
+router.post("/studentEdit/:id", async(req, res, next)=>{
+  try{
+    let {id} =req.params;
+    let data = req.body;
+    let newData = {};
+  
+    const newArray = Object.entries(data)
+    newArray.filter((item)=> {
+      if(item[1]){
+        newData[item[0]] = item[1]
+      }
+    })
+
+    const resultPage = await Student.findOneAndUpdate({"name": id}, newData)
+    if(resultPage == null){
+      throw '查無此id'
+    }
+
+    res.redirect(`/students/studentPage/${id}`)
+
+  }catch(e){
+    res.send({message:"Error with finding data"})
+    console.log(e)
+  }
+})
+// 個人刪除API
+router.get("/studentDelete/:id", async(req, res, next)=>{
+  try{
+    const id = req.params.id
+    const user =await User.findById(id);
+    if(!user){
+      throw '沒有這位使用者'
+    }
+    const resultUser = await User.findByIdAndDelete(id)
+
+    res.redirect(`/students/studentsList`)
+
+  }catch(e){
     res.send({message:"Error with finding data"})
     console.log(e)
   }
