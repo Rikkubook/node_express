@@ -39,17 +39,13 @@ router.post("/signup", async (req, res, next)=>{
 
     data.password = await bcrypt.hash(data.password,3)
 
-    const newUser =await User.create({
+    await User.create({
       name: data.name,
       email: data.email,
       password: data.password
     });
 
-    const token = generateToken(newUser);
-    res.cookie("user_session", token, 
-      { signed: true,
-        httpOnly: true
-      });  //寫入給前端 cookie
+    req.session.isVerify = true 
     res.redirect(`/students/studentsList`);
   }catch(error){
     // errorHandler(res,error,400)
@@ -80,11 +76,7 @@ router.post("/login", async(req, res, next)=>{
           next(err)
         }
         if(result === true){
-          const token = generateToken(user);
-          res.cookie("user_session", token, 
-          { signed: true, //簽名確保尚未串改
-            httpOnly: true //只能通過 HTTP 協議訪問
-          });  //寫入給前端 cookie
+          req.session.isVerify = true 
           res.redirect(`/students/studentsList`);
         }else{
           next(err)

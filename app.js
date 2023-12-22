@@ -1,7 +1,6 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser'); //接到 cookie
 var logger = require('morgan'); // 日誌
 const mongoose = require('mongoose');
 const dotenv = require("dotenv");
@@ -34,13 +33,16 @@ app.set('view engine', 'ejs'); //載入ejs
 app.use(logger('dev'));
 app.use(express.json());  //app.use(bodyParser.json()); //組裝傳入的資料
 app.use(express.urlencoded({ extended: false })); //app.use(bodyParser.urlencoded({ extended: false }));  // ???
-app.use(cookieParser(process.env.COOKIE_SECRET)); // 配置 cookieParser
 app.use(express.static(path.join(__dirname, 'public'))); // 預定靜態路由 使ejs 可以使用圖片等
 
 app.use(session({
-  secret: process.env.SECRET,
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+	cookie: { 
+    secure: false, // 如果使用 HTTPS，设置为 true
+    maxAge: process.env.SESSION_EXPIRES_DAY, // (目前1小時）
+  }
 }));
 
 app.use('/', indexRouter);
