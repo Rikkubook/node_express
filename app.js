@@ -6,6 +6,7 @@ var logger = require('morgan'); // 日誌
 const mongoose = require('mongoose');
 const dotenv = require("dotenv");
 dotenv.config({path:"./config.env"});
+const session = require('express-session');
 
 const DB =  process.env.DATABASE_COMPASS.replace('<password>',process.env.DATABASE_PASSWORD)
 
@@ -33,8 +34,14 @@ app.set('view engine', 'ejs'); //載入ejs
 app.use(logger('dev'));
 app.use(express.json());  //app.use(bodyParser.json()); //組裝傳入的資料
 app.use(express.urlencoded({ extended: false })); //app.use(bodyParser.urlencoded({ extended: false }));  // ???
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET)); // 配置 cookieParser
 app.use(express.static(path.join(__dirname, 'public'))); // 預定靜態路由 使ejs 可以使用圖片等
+
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: true
+}));
 
 app.use('/', indexRouter);
 app.use('/posts', postsRouter);

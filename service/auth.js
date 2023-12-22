@@ -14,7 +14,7 @@ const generateToken = (user) => {
 }
 const isAuth = function(req, res, next){
   // 確認 token 是否存在
-  const token = req.cookies.user_session;
+  const token = req.signedCookies.user_session;
   if (!token) {
     // 如果沒有 token，返回未授權
     return res.status(401).json({ message: '未授權' });

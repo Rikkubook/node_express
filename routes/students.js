@@ -5,7 +5,6 @@ const Student = require('../models/studentModel');
 const { successHandler, errorHandler } = require('../handler');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
-const jwt = require('jsonwebtoken');
 const { generateToken, isAuth } = require('../service/auth')
 
 // 註冊畫面
@@ -47,7 +46,10 @@ router.post("/signup", async (req, res, next)=>{
     });
 
     const token = generateToken(newUser);
-    res.cookie("user_session",token, { httpOnly: true }); //寫入給前端 cookie
+    res.cookie("user_session", token, 
+      { signed: true,
+        httpOnly: true
+      });  //寫入給前端 cookie
     res.redirect(`/students/studentsList`);
   }catch(error){
     // errorHandler(res,error,400)
@@ -79,7 +81,10 @@ router.post("/login", async(req, res, next)=>{
         }
         if(result === true){
           const token = generateToken(user);
-          res.cookie("user_session",token, { httpOnly: true });
+          res.cookie("user_session", token, 
+          { signed: true, //簽名確保尚未串改
+            httpOnly: true //只能通過 HTTP 協議訪問
+          });  //寫入給前端 cookie
           res.redirect(`/students/studentsList`);
         }else{
           next(err)
