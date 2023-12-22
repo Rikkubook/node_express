@@ -41,7 +41,7 @@ app.use(session({
   saveUninitialized: true,
 	cookie: { 
     secure: false, // 如果使用 HTTPS，设置为 true
-    maxAge: process.env.SESSION_EXPIRES_DAY, // (目前1小時）
+    maxAge: 3600000, // (目前1小時）
   }
 }));
 
