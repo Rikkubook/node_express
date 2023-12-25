@@ -1,14 +1,15 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var logger = require('morgan'); // 日誌
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const logger = require('morgan'); // 日誌
 const mongoose = require('mongoose');
 const dotenv = require("dotenv");
 dotenv.config({path:"./config.env"});
 const session = require('express-session');
+const flash = require('express-flash')
 
 const DB =  process.env.DATABASE_COMPASS.replace('<password>',process.env.DATABASE_PASSWORD)
-
+mongoose.set('strictQuery', false); 
 mongoose.connect(DB).then(()=>{
   console.log('資料庫連線成功')
 }).catch((error)=>{
@@ -16,14 +17,14 @@ mongoose.connect(DB).then(()=>{
 })
 
 //管理RouterAPI
-var postsRouter = require('./routes/posts'); 
-var usersRouter = require('./routes/users');
-var todoRouter = require('./routes/todo');
+const postsRouter = require('./routes/posts'); 
+const usersRouter = require('./routes/users');
+const todoRouter = require('./routes/todo');
 //渲染頁面用
-var studentsRouter = require('./routes/students');
-var indexRouter = require('./routes/index');
+const studentsRouter = require('./routes/students');
+const indexRouter = require('./routes/index');
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -41,9 +42,10 @@ app.use(session({
   saveUninitialized: true,
 	cookie: { 
     secure: false, // 如果使用 HTTPS，设置为 true
-    maxAge: 3600000, // (目前1小時）
+    maxAge: 24 * 60 * 60 * 1000, // (目前1天）
   }
 }));
+app.use(flash());
 
 app.use('/', indexRouter);
 app.use('/posts', postsRouter);

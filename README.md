@@ -48,7 +48,9 @@
   * DELETE: {{url}}/students/{{id}} 刪除學生單筆資訊
 
 # 搭配EJS 使用
-* 已搭配bcryptjs、validator、JWT
+* 已搭配bcryptjs、validator
+* express-flash
+* express-session
 * 所有內容皆須登入或註冊才可以看
 * 權限為7天
 

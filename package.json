@@ -12,6 +12,7 @@
     "dotenv": "^16.0.0",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
+    "express-flash": "^0.0.2",
     "express-session": "^1.17.3",
     "http-errors": "~1.6.3",
     "mongoose": "^6.3.1",

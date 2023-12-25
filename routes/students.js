@@ -9,7 +9,8 @@ const { generateToken, isAuth } = require('../service/auth')
 
 // 註冊畫面
 router.get("/signup", async(req, res, next)=>{
-  res.render('signup', { message: "" })
+  const errorMessage = req.flash('error');
+  res.render('signup', { errorMessage })
 })
 // 註冊API
 router.post("/signup", async (req, res, next)=>{
@@ -49,17 +50,18 @@ router.post("/signup", async (req, res, next)=>{
     res.redirect(`/students/studentsList`);
   }catch(error){
     // errorHandler(res,error,400)
-    res.render('signup', { message: error });
+    req.flash('error', error);
+    res.redirect('/students/signup');
   }
 })
 
 // 登入畫面
 router.get("/login", async(req, res, next)=>{
-  res.render('login', { message: "" })
+  const errorMessage = req.flash('error');
+  res.render('login', { errorMessage })
 })
 // 登入API
 router.post("/login", async(req, res, next)=>{
-
   try{
     const data = req.body
     if(!data.email){
@@ -71,25 +73,29 @@ router.post("/login", async(req, res, next)=>{
     const user = await User.findOne({ email: data.email }).select('+password')  // 為了要把預設不顯示的取出，添加+
     if(user){
       // 密碼驗證
-      await bcrypt.compare(data.password, user.password, (err, result) => {
-        if(err){
-          next(err)
-        }
-        if(result === true){
-          req.session.isVerify = true 
-          res.redirect(`/students/studentsList`);
-        }else{
-          next(err)
-        }
-      })
-      
+      const result = await comparePasswords(data.password, user.password);
+      if (result) {
+        req.session.isVerify = true;
+        res.redirect(`/students/studentsList`);
+      } else {
+        throw '密碼驗證不相符';
+      }
     } else{
       throw '尚未註冊'
     }
 
-  } catch (err){
-    console.log('err')
-    res.render('signup', { message: err });
+    async function comparePasswords(plainPassword, hashedPassword) {
+      try {
+        const result = await bcrypt.compare(plainPassword, hashedPassword);
+        return result;
+      } catch (error) {
+        console.error('密碼比對失敗:', error);
+        throw error;
+      }
+    }
+  } catch (error){
+    req.flash('error', error);
+    res.redirect('/students/login');
   }
 })
 
@@ -97,9 +103,11 @@ router.post("/login", async(req, res, next)=>{
 router.get("/studentsList", isAuth, async(req, res, next)=>{
   try{
     let data = await User.find()
-    res.render('students/studentsList', { data });
-  }catch{
-    res.send({message:"Error with finding data"})
+    res.render('students/studentsList', {students: data});
+  }catch(error){
+    console.log(error)
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
   }
 })
 // 個人資料畫面
@@ -110,7 +118,7 @@ router.get("/studentsList/:id", isAuth, async(req, res, next)=>{
     let userInfo = await Student.findOne({"name": id});
 
     if(!userData){
-      res.send({message:"無此使用者"})
+      throw '沒有這位使用者'
     }
     if(!userInfo){
       res.redirect(`/students/studentInsert/${id}`)
@@ -118,10 +126,9 @@ router.get("/studentsList/:id", isAuth, async(req, res, next)=>{
       res.redirect(`/students/studentPage/${id}`)
     }
 
-  }catch(e){
-    res.status(404)
-    res.send({message:"Error with finding data"})
-    console.log(e)
+  }catch(error){
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
   }
 })
 // 個人新增畫面
@@ -135,11 +142,10 @@ router.get("/studentInsert/:id", isAuth, async(req, res, next)=>{
       email: userData.email,
     };
     res.render('students/studentInsert',{student: data})
-    }catch(e){
-      res.status(404)
-      res.send({message:"Error with finding data"})
-      console.log(e)
-    }
+  }catch(error){
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
+  }
 })
 // 個人編輯畫面
 router.get("/studentEdit/:id", isAuth, async(req, res, next)=>{
@@ -156,10 +162,9 @@ router.get("/studentEdit/:id", isAuth, async(req, res, next)=>{
       scholarship:　userInfo.scholarship,
     };
     res.render('students/studentEdit',{student: data})
-  }catch(e){
-    res.status(404)
-    res.send({message:"Error with finding data"})
-    console.log(e)
+  }catch(error){
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
   }
 })
 // 個人呈現畫面
@@ -177,11 +182,19 @@ router.get("/studentPage/:id", isAuth, async(req, res, next)=>{
       scholarship:　userInfo.scholarship,
     };
     res.render('students/studentPage',{student: data})
-  }catch(e){
-    res.send({message:"Error with finding data"})
+  }catch(error){
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
   }
 })
-
+// 錯誤畫面
+router.get("/errorPage", async(req, res, next)=>{
+  let errorMessage = req.flash('error');
+  if(errorMessage[0]?.message){
+    errorMessage = errorMessage[0]?.message
+  }
+  res.render('students/errorPage', { errorMessage })
+})
 
 // 個人新增API
 router.post("/studentInsert/:id", async(req, res, next)=>{
@@ -206,10 +219,9 @@ router.post("/studentInsert/:id", async(req, res, next)=>{
     }else{
       throw '已有此位使用者資料'
     }
-  }catch(e){
-    res.status(404)
-    res.send({message:"Error with finding data"})
-    console.log(e)
+  }catch(error){
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
   }
 })
 // 個人修改API
@@ -233,9 +245,9 @@ router.post("/studentEdit/:id", async(req, res, next)=>{
 
     res.redirect(`/students/studentPage/${id}`)
 
-  }catch(e){
-    res.send({message:"Error with finding data"})
-    console.log(e)
+  }catch(error){
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
   }
 })
 // 個人刪除API
@@ -250,9 +262,9 @@ router.get("/studentDelete/:id", async(req, res, next)=>{
 
     res.redirect(`/students/studentsList`)
 
-  }catch(e){
-    res.send({message:"Error with finding data"})
-    console.log(e)
+  }catch(error){
+    req.flash('error', error);
+    res.redirect('/students/errorPage');
   }
 })
 

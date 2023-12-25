@@ -118,11 +118,11 @@ input[type="number"]::-webkit-outer-spin-button {
   width:50vw
 }
 .studentsListTable{
-  margin: 20px 20px 0;
+  margin: 20px 0px 0;
   max-width: 400px
 }
 .studentsPageTable{
-  margin: 20px 20px 0;
+  margin: 20px 0px 0;
   max-width: 400px
 }
 .studentsPageTable tfoot td{
@@ -147,7 +147,18 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .link {
   color: #96785F;
+  trnasiotn: 0.5s;
+  &:hover{
+    color: #96785F;
+  }
 }
-.red {
+.error {
   color: #b12f2f;
+}
+.error-card{
+  margin: 20px 0px 10px;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #e6b5b5;
+  border-radius: 10px;
 }
