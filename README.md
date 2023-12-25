@@ -22,10 +22,13 @@
 * 內頁
   * PATCH: {{url}}/posts/{{id}} 編輯單筆文章 (帶content)
   * DELETE: {{url}}/posts/{{id}} 刪除單筆文章
+
+## Likes (/likes)
 * 收藏
-  * GET : {{url}}/posts/likes 取得多筆收藏 (帶userID)
-  * POST: {{url}}/posts/postLikes 新增取消收藏文章 (帶userID、posts)
-  * DELETE: {{url}}/posts/likes 刪除多筆收藏
+  * GET : {{url}}/likes/{{id}} 查詢某人所有收藏文章
+  * POST: {{url}}/likes/page/{{id}} 新增某人收藏文章 (帶posts)
+  * DELETE: {{url}}/likes/page/{{id}} 取消某人收藏文章 (帶posts)
+  * DELETE: {{url}}/likes/{{id}} 刪除某人所有收藏文章
 
 ## Users (/users)
 * 目錄

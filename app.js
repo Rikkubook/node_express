@@ -18,6 +18,7 @@ mongoose.connect(DB).then(()=>{
 
 //管理RouterAPI
 const postsRouter = require('./routes/posts'); 
+const likesRouter = require('./routes/likes'); 
 const usersRouter = require('./routes/users');
 const todoRouter = require('./routes/todo');
 //渲染頁面用
@@ -49,6 +50,7 @@ app.use(flash());
 
 app.use('/', indexRouter);
 app.use('/posts', postsRouter);
+app.use('/likes', likesRouter);
 app.use('/users', usersRouter);
 app.use('/todo', todoRouter);
 app.use('/students', studentsRouter);
