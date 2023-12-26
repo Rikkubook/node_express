@@ -1,6 +1,5 @@
-const Post = require('../models/postModel')
-const Like = require('../models/likesModel')
-const User = require('../models/userModel')
+const Post = require('../models/postModel');
+const Like = require('../models/likesModel');
 const { successHandler, errorHandler } = require('../handler');
 
 const likeControl = {
